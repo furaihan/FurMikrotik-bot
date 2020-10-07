@@ -10,3 +10,39 @@
 }
 
 :local paramsLower [$tolower $params];
+:local fetchCommand ([/tool fetch url="https://raw.githubusercontent.com/furaihan/FurMikrotik-bot/master/util/availableCommand" output=user as-value]->"data")
+:local availableCommand [:toarray $fetchCommand]
+
+:local sendHelp do={
+	:local send [:parse [/system script get tg_sendMessage source]]
+}
+
+:local valid ([:typeof [:find $availableCommand $paramsLower]] != "nil")
+:if ($valid) do={
+	:local scriptName ("tg_cmd_$paramsLower")
+	:if ([:len [/system script find where name=$scriptName]] > 0) do={
+		/system script remove $scriptName;
+	}
+	:local scriptUrlInstall ("https://raw.githubusercontent.com/furaihan/FurMikrotik-bot/master/script%20text/$scriptName")
+	:do {
+		:local scriptSource ([/tool fetch url=$scriptUrlInstall output=user as-value]->"data")
+		/system script add name=$scriptName policy=read source=$scriptSource
+		$send chat=$chatid text=("Script $scriptName installed successfully")
+	} on-error={
+		$send chat=$chatid text=("Failed to install script")
+	}	
+}
+:if ($paramsLower = "list") do={
+	:local listScript ("List of available script%0A%0A")
+	:local number 0
+	:for i from=0 to=([:len $availableCommand] - 1) do={
+		:local command [:pick $availableCommand $i]
+		:set number ($number + 1)
+		:set listScript ($listScript."$number. $command%0A")
+	}
+	:set listScript ($listScript."%0Ato install a command just type /install <command>. For example%0A/install jokes")
+	$send chat=$chatid text=$listScript mode="Markdown"
+}
+:if ($paramsLower = "help") do={
+
+}
