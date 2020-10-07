@@ -1,0 +1,20 @@
+:local send [:parse [/system script get tg_sendMessage source]]
+:local tolower [:parse [/system script get func_lowercase source]]
+
+:local paramsLower [$tolower $params];
+
+:local sendHelp do={
+    :local send [:parse [/system script get tg_sendMessage source]];
+    :local txt ("Hi, $from%0Athis command will give you a random dad jokes that available on [https://icanhazdadjoke.com/](icanhazdadjoke)%0A");
+    :set txt ($txt."to use this command, simply send /jokes to this bot and the bot will reply with a random jokes");
+    $send chat=$chatid text=$txt mode="Markdown"
+}
+
+
+:if ([:len $params] = 0) do={
+    :local jokes    ([/tool fetch http-header-field="Accept: text/plain, User-Agent: (https://github.com/user/repo)"\
+                    url="https://icanhazdadjoke.com/" output=user as-value]->"data")
+    $send chat=$chatid text=$jokes mode="Markdown";
+} else={
+    $sendhelp from=$from;
+}

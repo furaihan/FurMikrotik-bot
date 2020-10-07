@@ -1,0 +1,116 @@
+:local send [:parse [/system script get tg_sendMessage source]]
+:local tolower [:parse [/system script get func_lowercase source]]
+:local param1 [:pick $params 0 [:find $params " "]]
+:local param2 [:pick $params ([:find $params " "]+1) [:len $params]]
+:local param3 [:pick [:pick $params ([:find $params " "]+1) [:len $params]] ([:find [:pick $params ([:find $params " "]+1) [:len $params]] " "]+1) [:len [:pick $params ([:find $params " "]+1) [:len $params]]]]
+:if ([:len [:find $param2 " "]]>0) do={
+	:set param2 [:pick [:pick $params ([:find $params " "]+1) [:len $params]] 0 [:find [:pick $params ([:find $params " "]+1) [:len $params]] " "]]
+} else={
+	:set param3 ""
+}
+
+:local paramsLower [$tolower $params];
+:local param1Lower [$tolower $param1];
+:local param2Lower [$tolower $param2];
+:local param3Lower [$tolower $param3]
+:global RandomizeStyle;
+
+:if ($paramsLower = "method") do={
+	:local invalidmode
+	:set invalidmode ("*Operation is invalid*%0A");
+	:set invalidmode ($invalidmode."%0A_Valid options are:_%0A");
+	:set invalidmode ($invalidmode."/randomize method _local_%0A");
+	:set invalidmode ($invalidmode."/randomize method _internet_%0A");
+	$send chat=$chatid text=("$invalidmode") mode="Markdown"
+	:return true
+}
+
+:if ($param1Lower = "method") do={
+	:if (($param2Lower = "local") or ($param2Lower = "internet")) do={
+		:if ($param2Lower = "local") do={ set RandomizeStyle ("local"); $send chat=$chatid text=("randomization method has been successfully changed to $RandomizeStyle") mode="Markdown" }
+		:if ($param2Lower = "internet") do={ set RandomizeStyle ("internet"); $send chat=$chatid text=("randomization method has been successfully changed to $RandomizeStyle") mode="Markdown"}
+	} else={
+		:local invalidmode
+		:set invalidmode ("*Option $param2 is invalid*%0A");
+		:set invalidmode ($invalidmode."%0A_Valid options are:_%0A");
+		:set invalidmode ($invalidmode."/randomize method _local_%0A");
+		:set invalidmode ($invalidmode."/randomize method _internet_%0A");
+		$send chat=$chatid text=("$invalidmode") mode="Markdown"
+		:return true
+	}
+}
+
+:if ($paramsLower = "help") do={
+	:local randomizehelp;
+	:set randomizehelp ("======== RANDOMIZE COMMAND ========%0A%0A");
+	:set randomizehelp ($randomizehelp."*Valid Options Are:*%0A");
+	:set randomizehelp ($randomizehelp.">	/randomize method _'local' <or> 'internet'_ - choose a randomization method between local or internet methods%0A");
+	:set randomizehelp ($randomizehelp."/randomize string <length> - generate random string (length maximum = 20)%0A");
+	:set randomizehelp ($randomizehelp."/randomize number <length> - generate random number (length maximum = 20)%0A");
+	$send chat=$chatid text=("$randomizehelp") mode="Markdown"
+	:return true
+}
+:if ($param1Lower = "string") do={
+	:if ([typeof [tonum $param2]] = "num") do={
+		:if (($param2 < 21) and ($param2 > 0)) do={
+			:if ($RandomizeStyle = "local") do={
+				:local randomize [:parse ([/tool fetch mode=https url="https://pastebin.com/raw/MjZ9G3uv" output=user as-value]->"data")];
+				:local rand [$randomize type="string"];
+				:local randomresult [:pick $rand 0 $param2 ];
+				:local rslstext ("*Here is your random string*%0A%0A");
+				:set rslstext ($rslstext." ``` $randomresult ``` ");
+				$send chat=$chatid text=("$rslstext") mode="Markdown"
+				:return true
+			}
+			:if ($RandomizeStyle = "internet") do={
+				:local randomorg [:tostr ([/tool fetch url="https://www.random.org/strings/\?num=1&len=20&digits=on&upperalpha=on&loweralpha=on&unique=on&format=plain&rnd=new" as-value output=user ]->"data")];
+				:local pickrandomorg [:pick $randomorg 0 $param2];
+				:local rsistext ("*Here is your random string*%0A%0A");
+				:set rsistext ($rsistext." ``` $pickrandomorg ``` ");
+				$send chat=$chatid text=("$rsistext") mode="Markdown"
+				:return true
+			}
+			:if (($RandomizeStyle != "local") and ($RandomizeStyle != "internet")) do={
+				$send chat=$chatid text=("randomize method has not been set, please type _/randomize method_ to continue") mode="Markdown"
+				:return true
+			}
+		} else={
+			$send chat=$chatid text=("Please choose range beetwen *1 - 20*") mode="Markdown"
+		}
+	} else={
+		$send chat=$chatid text=("*Invalid Parameter*%0A%0APlease type /randomize help for more information") mode="Markdown"
+	}
+}
+
+:if ($param1 = "number") do={
+	:if ([:typeof [:tonum $param2]] = "num") do={
+		:if (($param2 < 21) and ($param2 > 0)) do={
+			:if ($RandomizeStyle = "local") do={
+				:local randomize [:parse ([/tool fetch mode=https url="https://pastebin.com/raw/MjZ9G3uv" output=user as-value]->"data")];
+				:local rand [$randomize type="integer"];
+				:local randomresult [:pick $rand 0 $param2 ];
+				:local rslntext ("*Here is your random number*%0A%0A");
+				:set rslntext ($rslntext." ``` $randomresult ``` ");
+				$send chat=$chatid text=("$rslntext") mode="Markdown"
+				:return true
+			}
+			:if ($RandomizeStyle = "internet") do={
+				:local randomorg [:tostr ([/tool fetch url="https://www.random.org/strings/\?num=1&len=20&digits=on&unique=on&format=plain&rnd=new" as-value output=user ]->"data")];
+				:local pickrandomorg [:pick $randomorg 0 $param2];
+				:local rsintext ("*Here is your random number*%0A%0A");
+				:set rsintext ($rsintext." ``` $pickrandomorg ``` ");
+				$send chat=$chatid text=("$rsintext") mode="Markdown"
+				:return true
+			}
+			:if (($RandomizeStyle != "local") and ($RandomizeStyle != "internet")) do={
+				$send chat=$chatid text=("randomize method has not been set, please type _/randomize method_ to continue") mode="Markdown"
+				:return true
+			}
+
+		} else={
+			$send chat=$chatid text=("Please choose range beetwen *1 - 20*") mode="Markdown"
+		}
+	} else={
+		$send chat=$chatid text=("*Invalid Parameter*%0A%0APlease type /randomize help for more information") mode="Markdown"
+	}
+}

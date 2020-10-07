@@ -1,0 +1,63 @@
+:local send [:parse [/system script get tg_sendMessage source]]
+:local gkey [:parse [/system script get tg_getkey source]]
+:local tolower [:parse [/system script get func_lowercase source]]
+:local param1 [:pick $params 0 [:find $params " "]]
+:local param2 [:pick $params ([:find $params " "]+1) [:len $params]]
+:local param3 [:pick [:pick $params ([:find $params " "]+1) [:len $params]] ([:find [:pick $params ([:find $params " "]+1) [:len $params]] " "]+1) [:len [:pick $params ([:find $params " "]+1) [:len $params]]]]
+:if ([:len [:find $param2 " "]]>0) do={
+	:set param2 [:pick [:pick $params ([:find $params " "]+1) [:len $params]] 0 [:find [:pick $params ([:find $params " "]+1) [:len $params]] " "]]
+} else={
+	:set param3 ""
+}
+:local privateParams $params
+:put $params
+:put $param1
+:put $param2
+:put $param3
+:put $chatid
+:put $from
+
+
+:local paramsLower [$tolower $params];
+:put $paramsLower
+
+:local sendHelp do={
+	:local send [:parse [/system script get tg_sendMessage source]]
+	:local helpText
+	:set helpText ($helpText."Short your long url with [rel.ink](https://rel.ink/) shortener services, powered by Cloudflare%0A%0A")
+	:set helpText ($helpText." *Usage*: %0A")
+	:set helpText ($helpText."/shorten _<long-url>_%0A%0A")
+	:set helpText ($helpText." *Example*: %0A")
+	:set helpText ($helpText."/shorten _https://mikrotik.com/download_")
+	$send chat=$chatid text=$helpText mode="Markdown"
+}
+
+:if ($paramsLower = "help") do={
+	$sendHelp
+}
+
+:if ([:pick $privateParams ([:len $privateParams]-1 )] = "/") do={
+	:set privateParams [:pick $privateParams 0 ([:len $privateParams] - 2)];
+	:put $privateParams;
+}
+:put [:len $params]
+:if (([:len $params] > 0) and ($paramsLower != "help")) do={
+	:do {
+		:local httpData ("{\"url\":\"$privateParams\"}")
+		:put $httpData
+		:local shortData ([/tool fetch http-method=post http-header-field="content-type: application/json" http-data=("$httpData") url="https://rel.ink/api/links/" output=user as-value]->"data")
+		:put $shortData
+		:local hashID [$gkey key=hashid text=$shortData]
+		:local shortUrl ("https://rel.ink/$hashID")
+		:put $shortUrl
+		:local sendThisText
+		:set sendThisText ($sendThisText."Your link is successfully shortened%0A")
+		:set sendThisText ($sendThisText."[$shortUrl]($shortUrl)%0A")
+		$send chat=$chatid text=$sendThisText mode="Markdown"
+	} on-error={
+		$send chat=$chatid text=("Something went wrong. Try again later or check your url")
+		$sendHelp
+	}
+} else={
+	$sendHelp
+}

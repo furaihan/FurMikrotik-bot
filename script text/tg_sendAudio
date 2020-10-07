@@ -1,0 +1,14 @@
+:local configuration [:parse [/system script get tg_config source]]
+:local conf [$configuration]
+:local chatID ($conf->"defaultChatID")
+:local botID ($conf->"botAPI")
+:local storage ($conf->"storage")
+
+:if ([:len $chat]>0) do={:set chatID $chat}
+:local url "https://api.telegram.org/bot$botID/sendAudio?chat_id=$chatID&audio=$audio"
+
+:local file ($tgStorage."tg_get_updates.txt")
+:local logfile ($tgStorage."tg_fetch_log.txt")
+:put $url
+
+/tool fetch url=$url keep-result=no
