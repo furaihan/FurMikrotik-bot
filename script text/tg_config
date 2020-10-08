@@ -22,5 +22,6 @@
 	"timeout"=5;
 	"refresh_active"=15;
 	"refresh_standby"=300;
+	"available_for_public"=true;
 }
 return $config

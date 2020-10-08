@@ -11,6 +11,7 @@
 :local botID ($cfg->"botAPI")
 :local storage ($cfg->"storage")
 :local timeout ($cfg->"timeout")
+:local availableForPublic [:tobool ($cfg->"available_for_public")]
 
 :put "cfg=$cfg"
 :put "trusted=$trusted"
@@ -67,11 +68,14 @@
 :put "in chat=$chatid"
 :put "command=$chattext"
 
-:local allowed ( [:type [:find $trusted $fromid]]!="nil" or [:type [:find $trusted $chatid]]!="nil")
-:if (!$allowed) do={
- :put "Unknown sender, keep silence"
- :return -1
+:if (!$availableForPublic) do={
+  :local allowed ( [:type [:find $trusted $fromid]]!="nil" or [:type [:find $trusted $chatid]]!="nil")
+  :if (!$allowed) do={
+  :put "Unknown sender, keep silence"
+  :return -1
+  }  
 }
+
 
 :local cmd ""
 :local params ""

@@ -1,12 +1,13 @@
 :local send [:parse [/system script get tg_sendMessage source]]
 :local tolower [:parse [/system script get func_lowercase source]]
-:local param1 [:pick $params 0 [:find $params " "]]
-:local param2 [:pick $params ([:find $params " "]+1) [:len $params]]
-:local param3 [:pick [:pick $params ([:find $params " "]+1) [:len $params]] ([:find [:pick $params ([:find $params " "]+1) [:len $params]] " "]+1) [:len [:pick $params ([:find $params " "]+1) [:len $params]]]]
-:if ([:len [:find $param2 " "]]>0) do={
-	:set param2 [:pick [:pick $params ([:find $params " "]+1) [:len $params]] 0 [:find [:pick $params ([:find $params " "]+1) [:len $params]] " "]]
-} else={
-	:set param3 ""
+:local fconfig [:parse [/system script get tg_config source]]
+:local config [$fconfig]
+
+:local trusted [:toarray ($config->"trusted")]
+:local allowed ([:type [:find $trusted $chatid]] != "nil")
+:if (!$allowed) do={
+ :put "Unknown sender, keep silence"
+ :return -1
 }
 
 :local paramsLower [$tolower $params];
@@ -21,7 +22,8 @@
 :if ($valid) do={
 	:local scriptName ("tg_cmd_$paramsLower")
 	:if ([:len [/system script find where name=$scriptName]] > 0) do={
-		/system script remove $scriptName;
+		$send chat=$chatid text=("$scriptName script has been installed, if you want to update the script, use /update instead");
+		:return -1
 	}
 	:local scriptUrlInstall ("https://raw.githubusercontent.com/furaihan/FurMikrotik-bot/master/script%20text/$scriptName")
 	:do {
