@@ -16,5 +16,5 @@
                     url="https://icanhazdadjoke.com/" output=user as-value]->"data")
     $send chat=$chatid text=$jokes mode="Markdown";
 } else={
-    $sendhelp from=$from;
+    $sendhelp from=$from chatid=$chatid;
 }

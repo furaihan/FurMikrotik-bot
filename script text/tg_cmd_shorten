@@ -33,7 +33,7 @@
 }
 
 :if ($paramsLower = "help") do={
-	$sendHelp
+	$sendHelp chatid=$chatid;
 }
 
 :if ([:pick $privateParams ([:len $privateParams]-1 )] = "/") do={
@@ -56,8 +56,8 @@
 		$send chat=$chatid text=$sendThisText mode="Markdown"
 	} on-error={
 		$send chat=$chatid text=("Something went wrong. Try again later or check your url")
-		$sendHelp
+		$sendHelp chatid=$chatid;
 	}
 } else={
-	$sendHelp
+	$sendHelp chatid=$chatid;
 }

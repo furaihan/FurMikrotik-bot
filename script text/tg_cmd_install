@@ -33,6 +33,13 @@
 	} on-error={
 		$send chat=$chatid text=("Failed to install script")
 	}	
+} else={
+	:if ([:len $param1] = 1) do={
+		$send chat=$chatid text=("Unfortunately, $params script is not available yet, please type /install list to show you all of available scripts")
+	} else={
+		$sendHelp from=$from
+	}
+	
 }
 :if ($paramsLower = "list") do={
 	:local listScript ("List of available script%0A%0A")
@@ -46,5 +53,5 @@
 	$send chat=$chatid text=$listScript mode="Markdown"
 }
 :if ($paramsLower = "help") do={
-
+	$sendHelp from=$from
 }

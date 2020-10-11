@@ -1,53 +1,26 @@
 :local send [:parse [/system script get tg_sendMessage source]]
-:local param1 [:pick $params 0 [:find $params " "]]
-:local param2 [:pick $params ([:find $params " "]+1) [:len $params]]
-:local param3 [:pick [:pick $params ([:find $params " "]+1) [:len $params]] ([:find [:pick $params ([:find $params " "]+1) [:len $params]] " "]+1) [:len [:pick $params ([:find $params " "]+1) [:len $params]]]]
-:if ([:len [:find $param2 " "]]>0) do={
-	:set param2 [:pick [:pick $params ([:find $params " "]+1) [:len $params]] 0 [:find [:pick $params ([:find $params " "]+1) [:len $params]] " "]]
-} else={
-	:set param3 ""
-}
-
-:put $params
-:put $param1
-:put $param2
-:put $param3
-:put $chatid
-:put $from
-
-:local ConvertUpperCase do={
-	:local alphabet {"a"="A";"b"="B";"c"="C";"d"="D";"e"="E";"f"="F";"g"="G";"h"="H";"i"="I";"j"="J";"k"="K";"l"="L";"m"="M";"n"="N";"o"="O";"p"="P";"q"="Q";"r"="R";"s"="S";"t"="T";"u"="U";"v"="V";"x"="X";"z"="Z";"y"="Y";"w"="W"};
-	:local result
-	:local character
-	:for strings from=0 to=([:len $1] - 1) do={
-		:local single [:pick $1 $strings]
-		:set character ($alphabet->$single)
-		:if ([:typeof $character] = "str") do={set single $character}
-		:set result ($result.$single)
-	}
-	:return $result
-}
+:local toupper [:parse [/system script get func_uppercase source]]
 
 if ($params = "help") do={
-local helptext ("======== UPPERCASE COMMAND ========%0A%0A")
-local helptext ($helptext."This command will convert given text to uppercase%0A%0A")
-local helptext ($helptext."*USAGE:*%0A")
-local helptext ($helptext."/uppercase _<text>_%0A%0A")
-local helptext ($helptext."*EXAMPLE*%0A")
-local helptext ($helptext."/uppercase _aNtIdIsEsTaBlIsHmEnTaRiAnIsM_%0A%0A")
-local helptext ($helptext."*The output should be:*%0A")
-local helptext ($helptext."ANTIDISESTABLISHMENTARIANISM%0A%0A")
-local helptext ($helptext."*NOTE:*%0A")
-local helptext ($helptext."> you can use many words as you want, but please dont spam this command too frequently%0A")
-local helptext ($helptext."> if possible, please dont use any punctuation mark. That will cause script doesnt work properly%0A")
-$send chat=$chatid text=("$helptext") mode="Markdown"
+	:local helptext ("======== UPPERCASE COMMAND ========%0A%0A");
+	:local helptext ($helptext."This command will convert given text to uppercase%0A%0A");
+	:local helptext ($helptext."*USAGE:*%0A");
+	:local helptext ($helptext."/uppercase _<text>_%0A%0A");
+	:local helptext ($helptext."*EXAMPLE*%0A");
+	:local helptext ($helptext."/uppercase _aNtIdIsEsTaBlIsHmEnTaRiAnIsM_%0A%0A");
+	:local helptext ($helptext."*The output should be:*%0A");
+	:local helptext ($helptext."ANTIDISESTABLISHMENTARIANISM%0A%0A");
+	:local helptext ($helptext."*NOTE:*%0A");
+	:local helptext ($helptext."> you can use many words as you want, but please dont spam this command too frequently%0A");
+	:local helptext ($helptext."> if possible, please dont use any punctuation mark. That will cause script doesnt work properly%0A");
+	$send chat=$chatid text=("$helptext") mode="Markdown"
 }
 
 if (($params != "help") and ([:typeof $params] = "str")) do={
-local outputbody ("*Here is your uppercase text:*%0A%0A")
-local lctext [$ConvertUpperCase ("$params")]
-set outputbody ($outputbody."==============================%0A")
-set outputbody ($outputbody." ``` $lctext ``` %0A")
-set outputbody ($outputbody."==============================%0A")
-$send chat=$chatid text=("$outputbody") mode="Markdown"
+	:local outputbody ("*Here is your uppercase text:*%0A%0A");
+	:local lctext [$toupper ("$params")];
+	set outputbody ($outputbody."==============================%0A");
+	set outputbody ($outputbody." ``` $lctext ``` %0A");
+	set outputbody ($outputbody."==============================%0A");
+	$send chat=$chatid text=("$outputbody") mode="Markdown"
 }

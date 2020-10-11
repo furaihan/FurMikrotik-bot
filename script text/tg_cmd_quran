@@ -38,7 +38,7 @@
 }
 
 :if ($paramsLower = "help") do={
-    $sendHelp
+    $sendHelp chatid=$chatid
     :return true
 }
 :local dataFileName ("quran-json.txt");
@@ -70,7 +70,7 @@
     :return true
 } else={
     :if (($paramsLower != "help" )and ($param1Lower != "language")) do={
-        $sendHelp
+        $sendHelp chatid=$chatid
     }
 }
 
@@ -94,5 +94,5 @@
         $send chat=$chatid text=("current language is $[($listLangValue->$currentLanguage)]")
     }
     :local invalid ([typeof [:find $listLang "$param2Lower"]] = "nil" and $param2Lower != "list" and $param2Lower != "current")
-    :if ($invalid) do={$sendHelp}
+    :if ($invalid) do={$sendHelp chatid=$chatid;}
 }

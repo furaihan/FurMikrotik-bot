@@ -1,5 +1,6 @@
 :local send [:parse [/system script get tg_sendMessage source]]
 :local tolower [:parse [/system script get func_lowercase source]]
+:local toupper [:parse [/system script get func_uppercase source]]
 :local param1 [:pick $params 0 [:find $params " "]]
 :local param2 [:pick $params ([:find $params " "]+1) [:len $params]]
 :local param3 [:pick [:pick $params ([:find $params " "]+1) [:len $params]] ([:find [:pick $params ([:find $params " "]+1) [:len $params]] " "]+1) [:len [:pick $params ([:find $params " "]+1) [:len $params]]]]
@@ -9,13 +10,16 @@
 	:set param3 ""
 }
 
+
 :local paramsLower [$tolower $params];
 :local param1Lower [$tolower $param1];
 :local param2Lower [$tolower $param2];
-:local param3Lower [$tolower $param3]
+:local param3Lower [$tolower $param3];
+:local param2Upper [$toupper $param2];
+:local param1Upper [$toupper $param1];
 
 :local encode do={
-    :local subs {","="%0A"; "\""=""; ":"=" --> "}
+    :local subs {","="%0A"; "\""=" "; ":"=" --> "}
 	:local result
 	:local character
 	:for strings from=0 to=([:len $1] - 1) do={
@@ -26,32 +30,54 @@
 	}
 	:return $result
 }
+:local sendHelp do={
+    :local send [:parse [/system script get tg_sendMessage source]]
+    :local txt ("Hey $from%2C%0A")
+    :set txt ($txt."Use this command to calculate live currency from [Frankfurter App](https://www.frankfurter.app/)%0A%0A")
+    :set txt ($txt."*USAGE:*%0A")
+    :set txt ($txt."/currency <from> <to> <amount>%0A%0A")
+    :set txt ($txt."*EXAMPLE:*%0A")
+    :set txt ($txt."/currency _usd sgd 20_ (this will convert 20 USD to SGD)%0A%0A")
+    :set txt ($txt."*NOTE: *%0A")
+    :set txt ($txt."> To see the list of supported currencies just type /currency list%0A")
+    :set txt ($txt."> If you dont specify amount, its default value will be 1%0A")
+    $send chat=$chatid text=$txt mode="Markdown"
+}
 
-:local url ("https://api.frankfurter.app/latest\?from=$param1Lower&to=$param2Lower")
-:local listCurrency [:toarray (("aud", "bgn", "brl", "cad", "chf", "cny", "czk", "dkk", "eur", "gbp", "hkd", "hrk", "huf",\
+:local url ("https://api.frankfurter.app/latest\?from=$param1Upper&to=$param2Upper")
+:local listCurrency [:toarray ("aud", "bgn", "brl", "cad", "chf", "cny", "czk", "dkk", "eur", "gbp", "hkd", "hrk", "huf",\
                              "idr", "ils", "inr", "isk", "jpy", "krw", "mxn", "myr", "nok", "nzd", "php", "pln", "ron", "rub",\
-                             "sek", "sgd", "thb", "try", "usd", "zar"))
+                             "sek", "sgd", "thb", "try", "usd", "zar")]
 
+:if ($paramsLower = "list") do={
+    :local fetchCurrencies ([/tool fetch url="https://api.frankfurter.app/currencies" output=user as-value]->"data")
+    :local supportedCurrencies [:pick $fetchCurrencies 1 ([:len $fetchCurrencies] - 1)]
+    :local text ("List of supported currencies:%0A%0A$[$encode $supportedCurrencies]")
+    $send chat=$chatid text=$text
+    :return true
+}
+
+:if ($paramsLower = "help") do={$sendHelp from=$from chatid=$chatid; :return true}
 
 :if ([:len $params] > 0) do={
     :local valid (([:typeof [:find $listCurrency $param1Lower]] != "nil") and ([:typeof [:find $listCurrency $param2Lower]] != "nil"))
     :if ($valid) do={
         :local amountValid (([:len $param3] > 0) and ([:typeof [:tonum $param3]] = "num") and ([:tonum $param3] > 0))
-        :if (!$amountValid) do={ :set url ($url."&amount=$param3Lower")}
-        :local fetchData ([/tool feth url=$url output=user as-value]->"data")
+        :if ($amountValid) do={ :set url ($url."&amount=$param3Lower")}
+        :put $url
+        :local fetchData ([/tool fetch url=$url output=user as-value]->"data")
+        :local afterConversion [:pick $fetchData ([:find $fetchData $param2Upper] + 5) ([:len $fetchData] - 2)]
+        :local sendThisText ("*Conversion Result:%0A*")
+        :if ($amountValid) do={:set $sendThisText ($sendThisText."$param3 ")} else={:set $sendThisText ($sendThisText."1 ")}
+        :set sendThisText ($sendThisText."$param1Upper equal to $afterConversion $param2Upper")
+        $send chat=$chatid text=$sendThisText mode="Markdown"
     } else={
+        :if ([:typeof [:find $listCurrency $paramsLower]] != "nil") do={$sendHelp from=$from; :return true}
         :local currencyInvalid ("Hey $from, currently $param1 ")
         :if ([:len $param2] > 0) do={:set currencyInvalid ($currencyInvalid."and $param2 ");}
         :set currencyInvalid ($currencyInvalid."is not yet supported")
         $send chat=$chatid text=$currencyInvalid
     }
 } else={
-    $sendHelp from=$from
+    $sendHelp from=$from chatid=$chatid;
 }
-
-
-
-:local fetchCurrencies ([/tool fetch url="https://api.frankfurter.app/currencies" output=user as-value]->"data")
-:local supportedCurrencies [:pick $fetchCurrencies 1 ([:len $fetchCurrencies] - 1)]
-:local text ("List of supported currencies:%0A%0A$[$encode $supportedCurrencies]")
-$send chat=$chatid 

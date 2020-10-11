@@ -1,0 +1,15 @@
+:local send [:parse [/system script get tg_sendMessage source]]
+:local tolower [:parse [/system script get func_lowercase source]]
+:local fconfig [:parse [/system script get tg_config source]]
+:local config [$fconfig]
+
+:local trusted [:toarray ($config->"trusted")]
+:local allowed ([:type [:find $trusted $chatid]] != "nil")
+:if (!$allowed) do={
+ :put "Unknown sender, keep silence"
+ :return -1
+}
+
+:local paramsLower [$tolower $params];
+:local fetchCommand ([/tool fetch url="https://raw.githubusercontent.com/furaihan/FurMikrotik-bot/master/util/availableCommand" output=user as-value]->"data")
+:local availableCommand [:toarray $fetchCommand]
