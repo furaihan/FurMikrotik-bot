@@ -97,6 +97,9 @@
 :put "cmd=<$cmd>"
 :put "params=<$params>"
 
+:local alternativeCommand {"hi"="help"; "start"="help"; "hello"="help"; "support"="help"; "assistance"="help"}
+:if ([:typeof ($alternativeCommand -> $cmd)] = "str") do={:set cmd ($alternativeCommand -> $cmd); :put "cmd=<$cmd>"}
+
 :global TGLASTCMD $cmd
 
 :put "Try to invoke external script tg_cmd_$cmd"

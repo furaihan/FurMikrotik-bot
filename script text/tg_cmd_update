@@ -13,3 +13,55 @@
 :local paramsLower [$tolower $params];
 :local fetchCommand ([/tool fetch url="https://raw.githubusercontent.com/furaihan/FurMikrotik-bot/master/util/availableCommand" output=user as-value]->"data")
 :local availableCommand [:toarray $fetchCommand]
+
+:local sendHelp do={
+    :local send [:parse [/system script get tg_sendMessage source]]
+    :local txt ("Hi, $from%0AUse this command to update your installed script%0A\
+                *Usage:*%0A/update <command>%0A*Example:*%0A/update _jokes_%0A\
+                *Note:*%0Ato see the available script just type /update list");
+    $send chat=$chatid text=$txt mode="Markdown";
+}
+
+:if ($paramsLower = "list") do={
+	:local listScript ("List of available script%0A%0A")
+	:local number 0
+	:for i from=0 to=([:len $availableCommand] - 1) do={
+		:local command [:pick $availableCommand $i]
+		:set number ($number + 1)
+		:set listScript ($listScript."$number. $command%0A")
+	}
+	:set listScript ($listScript."%0Ato update a command just type /update <command>. For example%0A/update jokes")
+	$send chat=$chatid text=$listScript mode="Markdown"; :return -1
+}
+:if ($paramsLower = "help") do={
+	$sendHelp from=$from chatid=$chatid; :return -1
+}
+
+:if ([:len $params] > 0) do={
+    :local valid ([:typeof [:find $availableCommand $paramsLower]] != "nil")
+    :if ($valid) do={
+        :local scriptName ("tg_cmd_$paramsLower")
+        :if ([:len [/system script find where name=$scriptName]] > 0) do={
+            /system script remove $scriptName;
+            :local scriptUrlInstall ("https://raw.githubusercontent.com/furaihan/FurMikrotik-bot/master/script%20text/$scriptName")
+            :do {
+                :local scriptSource ([/tool fetch url=$scriptUrlInstall output=user as-value]->"data")
+                /system script add name=$scriptName policy=read source=$scriptSource
+                $send chat=$chatid text=("Script $scriptName updated successfully")
+            } on-error={
+                $send chat=$chatid text=("Failed to update script, please try again later")
+            }	
+        } else={
+            $send chat=$chatid text=("$scriptName is not installed, please use /install $paramsLower to install")
+        }
+    } else={
+        :if ([:len $param1] = 1) do={
+            $send chat=$chatid text=("Unfortunately, $params script is not available yet, please type /update list to show you all of available scripts")
+            :return -1
+	    } else={
+		    $sendHelp from=$from chatid=$chatid; :return -1
+	    }
+    }
+} else={
+    $sendHelp from=$from chatid=$chatid; :return -1
+}

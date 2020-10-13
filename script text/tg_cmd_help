@@ -1,0 +1,15 @@
+:local send [:parse [/system script get tg_sendMessage source]]
+
+
+:local helpBody;
+:set helpBody ("Hi, $from%0ALorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt \
+                ut labore et dolore magna aliqua. Ut enim ad minim veniam%0A%0AAvailable Commands:%0A")
+
+:foreach script in=[/system script find where name~"tg_cmd_"] do={
+    :local name [/system script get $script name]
+    :local command [:pick $name 7 [:len $name]]
+    :set helpBody ($helpBody."/$command%0A")
+}
+:set helpBody ($helpBody."%0ANote:%0A> For detailed command help type: <command> help%0A\
+                > *install* and *update* command is only available for bot admin")
+$send chat=$chatid text=$helpBody mode="Markdown";
