@@ -1,0 +1,27 @@
+:local send [:parse [/system script get tg_sendMessage source]];
+:local tolower [:parse [/system script get func_lowercase source]];
+
+:local ipPrefix [:tostr $params];
+:local paramsLower [$tolower $params];
+
+:local sendHelp do={
+
+}
+
+#source: https://s.id/t5AP7
+:local ipAddress [:toip [:pick $ipPrefix 0 [:find $ipPrefix "/"]]]
+:if ([:typeof $ipAddress] != "ip") do={ $send chat=$chatid text=("Invalid Ip Address"); :return -1}
+:local subnetBits [:tonum [:pick $ipPrefix ([:find $ipPrefix "/"] + 1) [:len $ipPrefix]]];
+:local subnetMask ((255.255.255.255 << (32 - $subnetBits)) & 255.255.255.255);
+:if ([:len $params] > 0) do={
+    :local result ("*$params*%0A%0A")
+    :set result ($result."Address: $ipAddress%0A")
+    :set result ($result."Subnet Mask: $subnetMask%0A")
+    :set result ($result."Network Address: ".($ipAddress & $subnetMask)."/$subnetBits%0A")
+    :set result ($result."Max Address: ".(($ipAddress | ~$subnetMask) ^ 0.0.0.1)."%0A")
+    :set result ($result."Min Address: ".(($ipAddress & $subnetMask) | 0.0.0.1)."%0A")
+    :set result ($result."Broadcast Address: ".($ipAddress | ~$subnetMask)."%0A")
+    $send chat=$chatid text=$result mode="Markdown"
+} else={
+    $sendhelp from=$from chatid=$chatid
+}

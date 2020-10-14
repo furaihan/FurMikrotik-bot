@@ -1,0 +1,22 @@
+:local send [:parse [/system script get tg_sendMessage source]]
+:local gkey [:parse [/system script get tg_getkey source]]
+:local tolower [:parse [/system script get func_lowercase source]]
+:local param1 [:pick $params 0 [:find $params " "]]
+:local param2 [:pick $params ([:find $params " "]+1) [:len $params]]
+
+:local paramsLower [$tolower $params];
+:local param1Lower [$tolower $param1];
+:local param2Lower [$tolower $param2];
+
+:local sendHelp do={
+    :local send [:parse [/system script get tg_sendMessage source]]
+}
+
+:if ([:typeof $params] = "str") do={
+    :local searchCityUrl ("https://api.banghasan.com/sholat/format/json/kota/nama/$paramsLower")
+    :local searchJson ([/tool fetch url=$searchCityUrl output=user as-value]->"data")
+    :local cityCode [$gkey block=kota key=id text=$searchJson]
+    :local cityName [$gkey block=kota key=nama text=$searchJson]
+    # $send chat=$chatid text=("$cityName%0A$cityCode")
+    # unfinished
+}
