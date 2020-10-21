@@ -1,0 +1,51 @@
+:local send [:parse [/system script get tg_sendMessage source]]
+:local tolower [:parse [/system script get func_lowercase source]]
+:local toupper [:parse [/system script get func_uppercase source]]
+:local randomizeScriptUrl ("https://raw.githubusercontent.com/furaihan/FurMikrotik-bot/master/util/randomizeScript")
+
+
+:local paramsLower [$tolower $params]
+
+:local sendHelp do={
+    :local send [:parse [/system script get tg_sendMessage source]]
+    :local helptext ("%3D%3D%3D%3D%3D%3D%3D%20RANDOMCASE%20%3D%3D%3D%3D%3D%3D%3D%0A%0A")
+	:local helptext ($helptext."Hi $from, With this tool you can randomize the case of characters in text. \
+                    This tool arbitrarily selects the lower or upper case version of each character%0A%0A")
+	:local helptext ($helptext."*USAGE:*%0A")
+	:local helptext ($helptext."/randomcase _<text>_%0A%0A")
+	:local helptext ($helptext."*EXAMPLE*%0A")
+	:local helptext ($helptext."/randomcase _antidisestablishmentarianism_%0A%0A")
+	:local helptext ($helptext."*The output should be:*%0A")
+	:local helptext ($helptext."AntiDisEsTabLISHmeNtArIanIsM%0A%0A")
+	:local helptext ($helptext."*NOTE:*%0A")
+	:local helptext ($helptext."> you can use many words as you want, but please dont spam this command too frequently%0A")
+	:local helptext ($helptext."> if possible, please dont use any punctuation mark. That will cause script not work properly%0A")
+	$send chat=$chatid text=("$helptext") mode="Markdown"
+}
+
+:if (($paramsLower = "help") or ([:len $params] = 0)) do={$sendHelp from=$from chatid=$chatid; :return -1}
+
+:local randomize [:parse ([/tool fetch mode=https url=$randomizeScriptUrl output=user as-value]->"data")];
+
+:local result
+:if (([:len $params] > 0) and ([:typeof [:tostr $params]] = "str")) do={
+    :local randomNum [$randomize type="integer"];
+    :local num 0
+    :local numIndex 2
+    :for i from=0 to=([:len $paramsLower] - 1) do={
+        :set num ($num + 1)
+        :if ($num > 20) do={
+            :set num $numIndex;
+            :set numIndex ($numIndex + 1)
+            :if ($numIndex > 15) do={:set numIndex 2}
+        }
+        :local char [:pick $paramsLower $i]
+        :local selectNum [:pick $randomNum $num]
+        :if (($selectNum % 2) = 1) do={
+            :set char [$toupper $char]
+        }
+        :set result ($result.$char)
+    }
+    :put $result
+    $send chat=$chatid text=$result
+}

@@ -5,10 +5,14 @@
 :local paramsLower [$tolower $params];
 
 :local sendHelp do={
-
+    :local send [:parse [/system script get tg_sendMessage source]];
+    :local txt ("Hi $from, use this command to calculate an ip address (Max , Min, Network, and Broadcast Address)%0A%0A\
+                *Usage:*%0A/ipcalc <ip-prefix>%0A%0A*Example:*%0A/ipcalc 192.168.1.54/26")
+    $send chat=$chatid text=$txt mode="Markdown"
 }
 
 #source: https://s.id/t5AP7
+:if (($paramsLower = "help") or ([:len $params] = 0)) do={$sendHelp from=$from chatid=$chatid; :return -1}
 :local ipAddress [:toip [:pick $ipPrefix 0 [:find $ipPrefix "/"]]]
 :if ([:typeof $ipAddress] != "ip") do={ $send chat=$chatid text=("Invalid Ip Address"); :return -1}
 :local subnetBits [:tonum [:pick $ipPrefix ([:find $ipPrefix "/"] + 1) [:len $ipPrefix]]];
@@ -22,6 +26,4 @@
     :set result ($result."Min Address: ".(($ipAddress & $subnetMask) | 0.0.0.1)."%0A")
     :set result ($result."Broadcast Address: ".($ipAddress | ~$subnetMask)."%0A")
     $send chat=$chatid text=$result mode="Markdown"
-} else={
-    $sendhelp from=$from chatid=$chatid
 }
