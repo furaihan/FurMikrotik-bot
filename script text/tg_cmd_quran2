@@ -1,0 +1,7 @@
+#compact version of quran command
+#only support bahasa indonesia
+:local send [:parse [/system script get tg_sendMessage source]]
+:local gkey [:parse [/system script get tg_getkey source]]
+:local tolower [:parse [/system script get func_lowercase source]]
+:local param1 [:pick $params 0 [:find $params " "]]
+:local param2 [:pick $params ([:find $params " "]+1) [:len $params]]
