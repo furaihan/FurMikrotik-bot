@@ -1,0 +1,39 @@
+:local send [:parse [/system script get tg_sendMessage source]]
+:local tolower [:parse [/system script get func_lowercase source]]
+:local toupper [:parse [/system script get func_uppercase source]]
+
+:local paramsLower [$tolower $params]
+
+:local sendHelp do={
+    :local send [:parse [/system script get tg_sendMessage source]]
+    :local helptext ("%3D%3D%3D%3D%3D%3D%3D%20CAPITALIZE%20%3D%3D%3D%3D%3D%3D%3D%0A%0A")
+	:local helptext ($helptext."Hi $from, With this tool you can automatize capitalize and convert the given text title case%0A%0A")
+	:local helptext ($helptext."*USAGE:*%0A")
+	:local helptext ($helptext."/capitalize _<text>_%0A%0A")
+	:local helptext ($helptext."*EXAMPLE*%0A")
+	:local helptext ($helptext."/capitalize _hello world_%0A%0A")
+	:local helptext ($helptext."*The output should be:*%0A")
+	:local helptext ($helptext."Hello World%0A%0A")
+	:local helptext ($helptext."*NOTE:*%0A")
+	:local helptext ($helptext."> you can use many words as you want, but please dont spam this command too frequently%0A")
+	:local helptext ($helptext."> if possible, please dont use any punctuation mark. That will cause script not work properly%0A")
+	$send chat=$chatid text=("$helptext") mode="Markdown"
+}
+
+:if (($paramsLower = "help") or ([:len $params] = 0)) do={$sendHelp from=$from chatid=$chatid; :return -1}
+
+:local result
+:if (([:len $params] > 0) and ([:typeof [:tostr $params]] = "str")) do={
+	:local pos 0
+	:for i from=0 to=([:len $paramsLower] - 1) do={
+		:set pos ($pos + 1)
+		:local char [:pick $paramsLower $i];
+		:local determine [:pick $paramsLower ($i -1)];
+		:if (($pos = 1) or ($determine = " ")) do={
+			:set char [$toupper $char];
+		}
+		:set result ($result.$char);
+	}
+	:if ([:len $result] < 2) do={$sendHelp from=$from chatid=$chatid; :return -1}
+	$send chat=$chatid text=$result;
+}
