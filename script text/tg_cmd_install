@@ -54,7 +54,7 @@
 		$send chat=$chatid text=("Failed to install script"); :return -1
 	}	
 } else={
-	:if ([:len $param1] = 1) do={
+	:if ([:typeof [:find $params " "]] != "num" ) do={
 		$send chat=$chatid text=("Unfortunately, $params script is not available yet, please type /install list to show you all of available scripts")
 	} else={
 		$sendHelp from=$from chatid=$chatid; :return -1

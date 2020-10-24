@@ -3,5 +3,41 @@
 :local send [:parse [/system script get tg_sendMessage source]]
 :local gkey [:parse [/system script get tg_getkey source]]
 :local tolower [:parse [/system script get func_lowercase source]]
-:local param1 [:pick $params 0 [:find $params " "]]
-:local param2 [:pick $params ([:find $params " "]+1) [:len $params]]
+:local paramsLower [$tolower $params]
+
+:if ($paramsLower = "help") do={
+    :local txt ("Hi, $from%0APerintah ini berguna untuk mendapatkan ayat alquran secara acak%0A");
+    :set txt ($txt."untuk menggunakannya, silahkan tulis \"/quran\" maka bot akan menjawab dengan ayat alquran yang terpilih secara random");
+    $send chat=$chatid text=$txt; :return true
+}
+
+:if ([:len $params] != 0) do={
+    $send chat=$chatid text=("Penggunaan perintah $params tidak tersedia, silahkan tulis \"/quran help\" untuk info lebih lanjut"); :return true
+}
+
+:local pickTextIndo do={
+    :return [:pick $text ([:find $text "\"teks\""] + [:len "\"teks\""] + 3) ([:len $text] - 12)]
+}
+
+:local pickTerxtArab do={
+    :return [:pick $text ([:find $text "\"teks\""] + [:len "\"teks\""] + 3) ([:len $text] - 1)]
+}
+
+:local fetch ([/tool fetch output=user url="https://api.banghasan.com/quran/format/json/acak" as-value ]->"data")
+:local acak [:pick $fetch 73 ([:find $fetch "nomor"] - 42)];
+:local arabBlock [:pick $acak [:find $acak "\"ar\""] [:len $acak]]  
+:local indoBlock [:pick $acak [:find $acak "\"id\""] ([:find $acak "},"] + 1)]
+:local teksIndoBefore [$pickTextIndo text=$indoBlock]
+:local teksIndo
+:for i from=0 to=([:len $teksIndoBefore] - 1) do={
+    :local char [:pick $teksIndoBefore $i]
+    :if ($char = "\\") do={
+        :set $char ""
+    }
+    :set teksIndo ($teksIndo.$char)
+}
+:local teksArab [$pickTerxtArab text=$arabBlock]
+:local surat [$gkey key=("\"nama\"") block=surat text=$fetch];
+:local ayat [$gkey key=("\"ayat\"") text=$indoBlock];
+:local sendtelegram ("*QS. $surat: $ayat*%0A%0A$teksArab%0A%0A*Terjemahan:*%0A$teksIndo");
+$send chat=$chatid text=$sendtelegram mode="Markdown"
