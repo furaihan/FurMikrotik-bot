@@ -1,10 +1,12 @@
 :local send [:parse [/system script get tg_sendMessage source]]
-:local param1 [:pick $params 0 [:find $params " "]]
-:local param2 [:pick $params ([:find $params " "]+1) [:len $params]]
 
-:put $params
-:put $param1
-:put $param2
-:put $chatid
-:put $from
+#ip address of api.telegram.org
+:local address 149.154.167.220
 
+:if ([:typeof [:toip $params]] = "ip" ) do={:set address $params}
+:local time
+#flood-ping
+/tool flood-ping $address count=10 do={
+    :set time $"avg-rtt";
+}
+$send chat=$chatid text=("Pong \F0\9F\8F\93%0A$time\ ms")
