@@ -1,5 +1,5 @@
 /system script
-add dont-require-permissions=no name=tg_cmd_help owner=admin policy=read \
+add name=tg_cmd_help policy=read \
     source=":local send [:parse [/system script get tg_sendMessage source]]\r\
     \n\r\
     \n\r\
@@ -20,7 +20,20 @@ add dont-require-permissions=no name=tg_cmd_help owner=admin policy=read \
     ot admin\")\r\
     \n\$send chat=\$chatid text=\$helpBody mode=\"Markdown\";\r\
     \n"
-add dont-require-permissions=no name=tg_cmd_update owner=admin policy=read \
+add name=tg_cmd_ping policy=read \
+    source=":local send [:parse [/system script get tg_sendMessage source]]\r\
+    \n\r\
+    \n#ip address of api.telegram.org\r\
+    \n:local address 149.154.167.220\r\
+    \n\r\
+    \n:if ([:typeof [:toip \$params]] = \"ip\" ) do={:set address \$params}\r\
+    \n:local time\r\
+    \n#flood-ping\r\
+    \n/tool flood-ping \$address count=10 do={\r\
+    \n    :set time \$\"avg-rtt\";\r\
+    \n}\r\
+    \n\$send chat=\$chatid text=(\"Pong \\F0\\9F\\8F\\93%0A\$time\\ ms\")"
+add name=tg_cmd_update policy=read \
     source=":local send [:parse [/system script get tg_sendMessage source]]\r\
     \n:local tolower [:parse [/system script get func_lowercase source]]\r\
     \n:local fconfig [:parse [/system script get tg_config source]]\r\
@@ -104,7 +117,7 @@ add dont-require-permissions=no name=tg_cmd_update owner=admin policy=read \
     \n} else={\r\
     \n    \$sendHelp from=\$from chatid=\$chatid; :return -1\r\
     \n}"
-add dont-require-permissions=no name=tg_cmd_install owner=admin policy=read \
+add name=tg_cmd_install policy=read \
     source=":local send [:parse [/system script get tg_sendMessage source]]\r\
     \n:local tolower [:parse [/system script get func_lowercase source]]\r\
     \n:local fconfig [:parse [/system script get tg_config source]]\r\
@@ -183,7 +196,7 @@ add dont-require-permissions=no name=tg_cmd_install owner=admin policy=read \
     \n\t}\r\
     \n\t\r\
     \n}"
-add dont-require-permissions=no name=tg_cmd_ipcalc owner=admin policy=read \
+add name=tg_cmd_ipcalc policy=read \
     source=":local send [:parse [/system script get tg_sendMessage source]];\r\
     \n:local tolower [:parse [/system script get func_lowercase source]];\r\
     \n\r\
@@ -223,7 +236,7 @@ add dont-require-permissions=no name=tg_cmd_ipcalc owner=admin policy=read \
     etMask).\"%0A\")\r\
     \n    \$send chat=\$chatid text=\$result mode=\"Markdown\"\r\
     \n}"
-add dont-require-permissions=no name=func_fetch owner=admin policy=read \
+add name=func_fetch policy=read \
     source="#########################################################\r\
     \n# Wrapper for /tools fetch\r\
     \n#  Input:\r\
@@ -294,7 +307,7 @@ add dont-require-permissions=no name=func_fetch owner=admin policy=read \
     \n#:put \$content\r\
     \nif (\$content~\"finished\") do={:return \"success\"}\r\
     \n:return \$FETCHRESULT"
-add dont-require-permissions=no name=func_lowercase owner=admin policy=read \
+add name=func_lowercase policy=read \
     source=":local alphabet {\"A\"=\"a\";\"B\"=\"b\";\"C\"=\"c\";\"D\"=\"d\";\
     \"E\"=\"e\";\"F\"=\"f\";\"G\"=\"g\";\"H\"=\"h\";\"I\"=\"i\";\"J\"=\"j\";\"\
     K\"=\"k\";\"L\"=\"l\";\"M\"=\"m\";\"N\"=\"n\";\"O\"=\"o\";\"P\"=\"p\";\"Q\
@@ -310,7 +323,7 @@ add dont-require-permissions=no name=func_lowercase owner=admin policy=read \
     \n}\r\
     \n:return \$result\r\
     \n"
-add dont-require-permissions=no name=func_uppercase owner=admin policy=read \
+add name=func_uppercase policy=read \
     source=":local alphabet {\"a\"=\"A\";\"b\"=\"B\";\"c\"=\"C\";\"d\"=\"D\";\
     \"e\"=\"E\";\"f\"=\"F\";\"g\"=\"G\";\"h\"=\"H\";\"i\"=\"I\";\"j\"=\"J\";\"\
     k\"=\"K\";\"l\"=\"L\";\"m\"=\"M\";\"n\"=\"N\";\"o\"=\"O\";\"p\"=\"P\";\"q\
@@ -325,7 +338,7 @@ add dont-require-permissions=no name=func_uppercase owner=admin policy=read \
     \n    :set result (\$result.\$single)\r\
     \n}\r\
     \n:return \$result"
-add dont-require-permissions=no name=tg_config owner=admin policy=read \
+add name=tg_config policy=read \
     source="######################################\r\
     \n# Telegram bot API, VVS/BlackVS 2017\r\
     \n#                                Config file\r\
@@ -354,7 +367,7 @@ add dont-require-permissions=no name=tg_config owner=admin policy=read \
     \n}\r\
     \nreturn \$config\r\
     \n"
-add dont-require-permissions=no name=tg_getUpdates owner=admin policy=\
+add name=tg_getUpdates policy=\
     reboot,read,write,policy,test,sniff,sensitive,romon source=":global TGLAST\
     MSGID\r\
     \n:global TGLASTUPDID\r\
@@ -470,7 +483,7 @@ add dont-require-permissions=no name=tg_getUpdates owner=admin policy=\
     \n:put \"Try to invoke external script tg_cmd_\$cmd\"\r\
     \n:local script [:parse [/system script get \"tg_cmd_\$cmd\" source]]\r\
     \n\$script params=\$params chatid=\$chatid from=\$name"
-add dont-require-permissions=no name=tg_sendMessage owner=admin policy=read \
+add name=tg_sendMessage policy=read \
     source=":local fconfig [:parse [/system script get tg_config source]]\r\
     \n\r\
     \n:local cfg [\$fconfig]\r\
@@ -488,7 +501,7 @@ add dont-require-permissions=no name=tg_sendMessage owner=admin policy=read \
     \n:local logfile (\$tgStorage.\"tg_fetch_log.txt\")\r\
     \n\r\
     \n/tool fetch url=\$url keep-result=no"
-add dont-require-permissions=no name=tg_getkey owner=admin policy=read \
+add name=tg_getkey policy=read \
     source=":local cur 0\r\
     \n:local lkey [:len \$key]\r\
     \n:local res \"\"\r\
@@ -515,7 +528,7 @@ add dont-require-permissions=no name=tg_getkey owner=admin policy=read \
     \n } \r\
     \n}\r\
     \n:return \$res"
-add dont-require-permissions=no name=tg_sendAudio owner=admin policy=read \
+add name=tg_sendAudio policy=read \
     source=":local configuration [:parse [/system script get tg_config source]\
     ]\r\
     \n:local conf [\$configuration]\r\
