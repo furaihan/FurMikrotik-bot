@@ -1,0 +1,39 @@
+:local send [:parse [/system script get tg_sendMessage source]];
+:local tolower [:parse [/system script get func_lowercase source]];
+:local newline [:parse [/system script get func_newline source]];
+:local param1 [:pick $params 0 [:find $params " "]];
+:local param2 [:pick $params ([:find $params " "]+1) [:len $params]];
+
+:put $params
+:put $param1
+:put $param2
+:put $from
+:put $fromid
+
+#check user file
+:local path ("tg-data/catatan/user-$fromid-data.txt")
+:put $path
+:if ([:len [/file find where name=$path]] < 1) do={
+    /system identity print file=$path
+    :delay 1500ms;
+    /file set $path contents=("\"asmanipun\"=\"$from\"")
+    $send chat=$chatid text=("New user found, we are creating a file configuration for you, then you can try again in 10 seconds")
+    :return 1
+}
+
+:local userData [:parse (":local data {".[/file get $path contents]."}; :return $data")]
+:set userData [$userData]
+:local catatanUser [/file get $path contents]
+#check if the title of the note is available
+:local isNameAvailable (([:typeof ($userData->"$param1")] = "nothing") or ([:typeof ($userData->"$param1")] = "nil"))
+:if (!$isNameAvailable) do={$send chat=$chatid text=("Sorry, $param1 note has been used, please try the other title");:return 1}
+:if ([:typeof [:find $params " "]] != "nil") do={
+    :local isi [$newline $param2]
+    :if ([:len $param2] > 1500) do={
+        $send chat=$chatid text=("error: text is too long")
+        :return 1
+    }
+    :set catatanUser ($catatanUser."; \"$param1\"=\"$isi\"")
+    /file set $path contents=$catatanUser
+    $send chat=$chatid text=("*$param1*%0AThis note has been added successfully") mode=Markdown
+}

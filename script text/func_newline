@@ -1,0 +1,24 @@
+:local result
+:local afterEncode
+:local input $1
+
+#if the text contains "\n" then change "n" to "%0A"
+:for i from=0 to=([:len $input] - 1) do={
+    :local char [:pick $input $i];
+    :local determine [:pick $input ($i -1)];
+    :if (($determine = "\\") and ($char = "n")) do={
+        :set char "%0A";
+    }
+    :set afterEncode ($afterEncode.$char);
+}
+
+#if the text contains "\" then remove it
+:for j from=0 to=([:len $afterEncode] - 1) do={
+    :local char [:pick $afterEncode $j]
+    :if ($char = "\\") do={
+        :set $char ""
+    }
+    :set result ($result.$char)
+}
+
+:return $result

@@ -1,0 +1,8 @@
+:local param1 [:pick $params 0 [:find $params " "]];
+:local param2 [:pick $params ([:find $params " "]+1) [:len $params]];
+:local send [:parse [/system script get tg_sendMessage source]];
+:local newline [:parse [/system script get func_newline source]];
+:local test [$newline $params];
+$send chat=$chatid text=$test;
+$send chat=$chatid text=("$param1 $param2")
+[:typeof [:find $params " "]]

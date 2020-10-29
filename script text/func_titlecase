@@ -1,0 +1,15 @@
+:local result
+:local tolower [:parse [/system script get func_lowercase source]]
+:local toupper [:parse [/system script get func_uppercase source]]
+:local pos 0
+:local paramsLower [$tolower $1]
+:for i from=0 to=([:len $paramsLower] - 1) do={
+    :set pos ($pos + 1)
+    :local char [:pick $paramsLower $i];
+    :local determine [:pick $paramsLower ($i -1)];
+    :if (($pos = 1) or ($determine = " ")) do={
+        :set char [$toupper $char];
+    }
+    :set result ($result.$char);
+}
+:return $result
