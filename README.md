@@ -39,3 +39,8 @@ Setelah mendapatkan token bot telegram dan ChatID nya, lalu ikuti step dibawah i
 ## Changelog / Catatan Perubahan
 * [INDONESIA](CHANGELOG-ID.md)
 * [ENGLISH](CHANGELOG-EN.md)
+
+## Special Thanks
+Special thanks to 
+* [BlackVS](https://github.com/BlackVS/Mikrotik-scripts/tree/master/scripts/Telegram%20bot%20for%20Mikrotik) for creating Mikrotik and telegram script
+* All member who help me in [Forum Mikrotik](https://forum.mikrotik.com/index.php)
