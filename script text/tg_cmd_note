@@ -4,15 +4,8 @@
 :local param1 [:pick $params 0 [:find $params " "]];
 :local param2 [:pick $params ([:find $params " "]+1) [:len $params]];
 
-:put $params
-:put $param1
-:put $param2
-:put $from
-:put $fromid
-
 #check user file
 :local path ("tg-data/catatan/user-$fromid-data.txt")
-:put $path
 :if ([:len [/file find where name=$path]] < 1) do={
     /system identity print file=$path
     :delay 1500ms;
@@ -21,7 +14,7 @@
     :return 1
 }
 
-:local userData [:parse (":local data {".[/file get $path contents]."}; :return $data")]
+:local userData [:parse (":local data {".[/file get $path contents]."}; :return \$data")]
 :set userData [$userData]
 :local catatanUser [/file get $path contents]
 #check if the title of the note is available

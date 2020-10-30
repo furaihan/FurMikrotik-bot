@@ -1,0 +1,59 @@
+:local send [:parse [/system script get tg_sendMessage source]];
+:local tolower [:parse [/system script get func_lowercase source]];
+:local titlecase [:parse [/system script get func_titlecase source]];
+:local param1 [:pick $params 0 [:find $params " "]];
+:local param2 [:pick $params ([:find $params " "]+1) [:len $params]];
+:local param3 [:pick [:pick $params ([:find $params " "]+1) [:len $params]] ([:find [:pick $params ([:find $params " "]+1) [:len $params]] " "]+1) [:len [:pick $params ([:find $params " "]+1) [:len $params]]]]
+:if ([:len [:find $param2 " "]]>0) do={
+	:set param2 [:pick [:pick $params ([:find $params " "]+1) [:len $params]] 0 [:find [:pick $params ([:find $params " "]+1) [:len $params]] " "]]
+} else={
+	:set param3 ""
+}
+
+:local path ("tg-data/catatan/user-$fromid-data.txt")
+:local paramsLower [$tolower $params];
+:local param1Lower [$tolower $param1];
+:local param2Lower [$tolower $param2];
+
+:local removeString [:toarray ("remove", "delete", "hapus", "del", "getrid", "hilangkan", "lenyapkan", "erase")];
+:local lookString [:toarray ("view", "see", "look", "lihat", "check", "cek", "tengok")]
+:local listString [:toarray ("list", "daftar", "total", "all", "semua", "indeks", "catalog", "index")]
+
+:local userData [:parse (":local data {".[/file get $path contents]."}; :return \$data")]
+:set userData [$userData]
+
+:if ([:typeof [:find $listString $paramsLower]] != "nil") do={
+    :local listText ("Here is your note list:%0A%0A")
+    :local num 0
+    :foreach k,v in=$userData do={
+        :if ($k != "asmanipun") do={
+            :set num ($num + 1)
+            :set listText ($listText."$num. $[$titlecase $k]%0A")
+        }
+    }
+    :put $userData
+    :put $listText
+    $send chat=$chatid text=$listText; :return 1
+}
+
+:if ([:typeof [:find $lookString $param1Lower]] != "nil") do={
+    :local invalidNote (([:typeof ($userData->"$param2")] = "nothing") or ([:typeof ($userData->"$param2")] = "nil"))
+    :if ($invalidNote) do={$send chat=$chatid text=("the note you mean doesn't exist yet, to see all of your note you can type /mynote list"); :return 1}
+    :local lookText ("Here is your $param2 note:%0A".($userData->$param2))
+    $send chat=$chatid text=$lookText; :return 1
+}
+
+:if ([:typeof [:find $removeString $param1Lower]] != "nil") do={
+    :local invalidNote (([:typeof ($userData->"$param2")] = "nothing") or ([:typeof ($userData->"$param2")] = "nil"))
+    :if ($invalidNote) do={$send chat=$chatid text=("the note you mean doesn't exist yet, to see all of your note you can type /mynote list"); :return 1}
+    :local catatan ("\"asmanipun\"=\"$from\"")
+    :foreach key,value in=$userData do={
+        :local dontRemove (($key != "$param2") and ($key != "asmanipun"))
+        :if ($dontRemove) do={
+            :set catatan ($catatan."; \"$key\"=\"$value\"")
+        }
+        
+    }
+    /file set $path contents=$catatan
+    $send chat=$chatid text=("$param2 deleted successfully")
+}

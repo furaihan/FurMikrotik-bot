@@ -97,7 +97,8 @@
 :put "cmd=<$cmd>"
 :put "params=<$params>"
 
-:local alternativeCommand {"hi"="help"; "start"="help"; "hello"="help"; "support"="help"; "assistance"="help"}
+:local alternativeCommand {"hi"="help"; "start"="help"; "hello"="help"; "support"="help"; "assistance"="help"\
+                          "catatan"="mynote"; "catatanku"="mynote"; "notemanager"="mynote"; "listcatatan"="mynote"; "catat"="note"}
 :if ([:typeof ($alternativeCommand -> $cmd)] = "str") do={:set cmd ($alternativeCommand -> $cmd); :put "cmd=<$cmd>"}
 
 :global TGLASTCMD $cmd
