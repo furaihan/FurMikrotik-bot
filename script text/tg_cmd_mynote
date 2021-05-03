@@ -1,6 +1,5 @@
 :local send [:parse [/system script get tg_sendMessage source]];
 :local tolower [:parse [/system script get func_lowercase source]];
-:local titlecase [:parse [/system script get func_titlecase source]];
 :local param1 [:pick $params 0 [:find $params " "]];
 :local param2 [:pick $params ([:find $params " "]+1) [:len $params]];
 :local param3 [:pick [:pick $params ([:find $params " "]+1) [:len $params]] ([:find [:pick $params ([:find $params " "]+1) [:len $params]] " "]+1) [:len [:pick $params ([:find $params " "]+1) [:len $params]]]]
@@ -28,7 +27,7 @@
     :foreach k,v in=$userData do={
         :if ($k != "asmanipun") do={
             :set num ($num + 1)
-            :set listText ($listText."$num. $[$titlecase $k]%0A")
+            :set listText ($listText."$num. $k%0A")
         }
     }
     :put $userData
@@ -38,21 +37,20 @@
 
 :if ([:typeof [:find $lookString $param1Lower]] != "nil") do={
     :local invalidNote (([:typeof ($userData->"$param2")] = "nothing") or ([:typeof ($userData->"$param2")] = "nil"))
-    :if ($invalidNote) do={$send chat=$chatid text=("the note you mean doesn't exist yet, to see all of your note you can type /mynote list"); :return 1}
-    :local lookText ("Here is your $param2 note:%0A".($userData->$param2))
-    $send chat=$chatid text=$lookText; :return 1
+    :if ($invalidNote) do={$send chat=$chatid text=("$param2 is not available, please type /$cmd list"); :return 1}
+    :local lookText ("Here is your $param2 note:%0A================%0A```".($userData->$param2)."```%0A================%0A")
+    $send chat=$chatid text=$lookText mode=Markdown; :return 1
 }
 
 :if ([:typeof [:find $removeString $param1Lower]] != "nil") do={
     :local invalidNote (([:typeof ($userData->"$param2")] = "nothing") or ([:typeof ($userData->"$param2")] = "nil"))
-    :if ($invalidNote) do={$send chat=$chatid text=("the note you mean doesn't exist yet, to see all of your note you can type /mynote list"); :return 1}
+    :if ($invalidNote) do={$send chat=$chatid text=("$param2 is not available, please type /$cmd list"); :return 1}
     :local catatan ("\"asmanipun\"=\"$from\"")
     :foreach key,value in=$userData do={
         :local dontRemove (($key != "$param2") and ($key != "asmanipun"))
         :if ($dontRemove) do={
             :set catatan ($catatan."; \"$key\"=\"$value\"")
         }
-        
     }
     /file set $path contents=$catatan
     $send chat=$chatid text=("$param2 deleted successfully")

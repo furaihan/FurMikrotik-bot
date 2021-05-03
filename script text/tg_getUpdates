@@ -105,4 +105,4 @@
 
 :put "Try to invoke external script tg_cmd_$cmd"
 :local script [:parse [/system script get "tg_cmd_$cmd" source]]
-$script params=$params chatid=$chatid from=$name fromid=$fromid
+$script params=$params chatid=$chatid from=$name fromid=$fromid cmd=$cmd

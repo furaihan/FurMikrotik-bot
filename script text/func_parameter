@@ -1,0 +1,30 @@
+:local param1 [:pick $params 0 [:find $params " "]];
+:local param2 [:pick $params ([:find $params " "]+1) [:len $params]];
+:local param3 [:pick [:pick $params ([:find $params " "]+1) [:len $params]] ([:find [:pick $params ([:find $params " "]+1) [:len $params]] " "]+1) [:len [:pick $params ([:find $params " "]+1) [:len $params]]]]
+:if ([:len [:find $param2 " "]]>0) do={
+	:set param2 [:pick [:pick $params ([:find $params " "]+1) [:len $params]] 0 [:find [:pick $params ([:find $params " "]+1) [:len $params]] " "]]
+} else={
+	:set param3 ""
+}
+:local param4
+:if ([:len [:find $param3 " "]]>0) do={
+    :set param3 [:pick $param3 0 [:find $param3 " "]]
+    :set param4 [:pick $params ([:find $params $param3] + [:len $param3] + 1) [:len $params]]
+} else={
+    :set param4 ""
+}
+:local param5
+:if ([:len [:find $param4 " "]]>0) do={
+    :set param4 [:pick $param4 0 [:find $param4 " "]]
+    :set param5 [:pick $params ([:find $params $param4] + [:len $param4] + 1) [:len $params]]
+} else={
+    :set param5 ""
+}
+
+:put $params
+:put $param1
+:put $param2
+:put $param3
+:put $param4
+:local return [:toarray ($param1, $param2, $param3, $param4, $param5)]
+:return $return
